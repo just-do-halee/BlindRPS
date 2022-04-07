@@ -20,13 +20,6 @@ enum Result {
 }
 
 library HandFn {
-    function New(uint256 encrypted) public pure returns (Hand memory) {
-        return Hand({
-            card: Card.ROCK,
-            encryptedCard: encrypted
-        });
-    }
-
     function resultToString(Result result) public pure returns (string memory) {
         if (result == Result.WIN) {
             return "win";

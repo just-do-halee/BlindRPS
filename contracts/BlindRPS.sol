@@ -40,30 +40,45 @@ contract BlindRPS {
     }
 
     function getPlayer(address addr) isValidPlayerAddr(addr) 
-        external
-        view
-        returns (string memory state, string memory hand, uint256 betAmount, address competitor) {
-            (state, hand, betAmount, competitor) = getPlayerDisplay(addr);
-        }
+    external
+    view
+    returns (string memory state, string memory hand, uint256 betAmount, address competitor) {
+        (state, hand, betAmount, competitor) = getPlayerDisplay(addr);
+    }
+
+    function destroyRoom() isSenderState(StateKind.PENDING)
+    external {
+        Player storage owner = players[msg.sender];
+        require(
+            owner.state.competitor == address(0x0),
+            "Something Is Wrong."
+        );
+        
+        payable(msg.sender).transfer(owner.betAmount);
+        playerReset(owner);
+    }
 
     function createRoom(uint256 encryptedCard) isSenderState(StateKind.NONE)
-        external
-        payable {
-            address roomAddr = msg.sender;
+    external
+    payable {
+        address roomAddr = msg.sender;
 
-            players[roomAddr] = Player({
-                state: State({
-                    kind: StateKind.PENDING,
-                    competitor: address(0x0),
-                    timestamp: block.timestamp
-                }),
-                betAmount: msg.value,
-                hand: HandFn.New(encryptedCard)
-            });
-            
-            (string memory state, string memory hand, uint256 betAmount, address competitor) = getPlayerDisplay(roomAddr);
-            emit PlayerDisplay(roomAddr, roomAddr, state, hand, betAmount, competitor);
-        }
+        players[roomAddr] = Player({
+            state: State({
+                kind: StateKind.PENDING,
+                competitor: address(0x0),
+                timestamp: block.timestamp
+            }),
+            betAmount: msg.value,
+            hand: Hand({
+                card: Card.ROCK,
+                encryptedCard: encryptedCard
+            })
+        });
+        
+        (string memory state, string memory hand, uint256 betAmount, address competitor) = getPlayerDisplay(roomAddr);
+        emit PlayerDisplay(roomAddr, roomAddr, state, hand, betAmount, competitor);
+    }
 
     function joinRoom(
         Card card,

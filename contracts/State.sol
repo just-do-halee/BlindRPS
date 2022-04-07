@@ -19,14 +19,6 @@ struct State {
 }
 
 library StateFn {
-    function New() public pure returns (State memory) {
-        return State({
-            kind: StateKind.NONE,
-            competitor: address(0x0),
-            timestamp: 0
-        });
-    }
-
     function reset(State storage state) internal {
         state.kind = StateKind.NONE;
         state.competitor = address(0x0);
@@ -46,5 +38,4 @@ library StateFn {
             return "";
         }
     }
-
 }
